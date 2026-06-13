@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MCN: Fetal Distress – Adele Pillitteri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        .transition-all { transition: all 0.3s ease; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #b91c1c; border-radius: 8px; }
+        .recall-mode .reveal-text {
+            background-color: #cbd5e1;
+            color: transparent;
+            border-radius: 0.375rem;
+            padding: 0 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            box-shadow: inset 0 0 0 1px #94a3b8;
+        }
+        .recall-mode .reveal-text:hover,
+        .recall-mode .reveal-text.revealed {
+            background-color: #fde047;
+            color: #1e293b;
+            box-shadow: none;
+        }
+        .content-section { animation: fade 0.3s ease; }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .locked-section { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+        .quiz-feedback-correct { background-color: #dcfce7; border-left: 4px solid #22c55e; }
+        .quiz-feedback-wrong { background-color: #fee2e2; border-left: 4px solid #ef4444; }
+        .nav-btn.active { background-color: #fee2e2; color: #991b1b; border-right: 4px solid #dc2626; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { fd: { light: '#fee2e2', DEFAULT: '#dc2626', dark: '#991b1b' } } } }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 h-screen flex flex-col md:flex-row font-sans text-slate-800 overflow-hidden">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-fd-dark text-white p-4 flex justify-between items-center shadow-md z-30 shrink-0">
+        <button onclick="toggleMobileMenu()" class="text-white focus:outline-none z-40"><i class="fa-solid fa-bars text-2xl"></i></button>
+        <h1 class="font-bold text-lg absolute left-1/2 transform -translate-x-1/2 pointer-events-none"><i class="fa-solid fa-heart-crack mr-2"></i> Fetal Distress</h1>
+        <div class="w-8"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="hidden md:flex flex-col w-full md:w-80 bg-white shadow-2xl h-full absolute md:relative z-30 transition-all duration-300 shrink-0 border-r border-slate-200 overflow-y-auto">
+        <div class="p-6 bg-gradient-to-br from-fd-dark to-fd text-white hidden md:block shrink-0">
+            <h1 class="font-black text-2xl tracking-wide"><i class="fa-solid fa-heart-crack text-fd-light mr-2"></i> Fetal Distress</h1>
+            <p class="text-sm text-slate-300 mt-1">Adele Pillitteri · Maternal‑Child Nursing</p>
+        </div>
+        <div class="flex-1 py-4">
+            <ul class="space-y-1 text-sm font-medium">
+                <li><button onclick="showSection('home')" id="btn-home" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors"><i class="fa-solid fa-house w-6 nav-icon"></i><i class="fa-solid fa-lock w-6 hidden text-slate-400"></i> Home / Start</button></li>
+                <li><button onclick="showSection('overview')" id="btn-overview" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-book-open w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 1. Definition & Causes</button></li>
+                <li><button onclick="showSection('fhr')" id="btn-fhr" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-waveform w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 2. FHR Patterns & Decelerations</button></li>
+                <li><button onclick="showSection('meconium')" id="btn-meconium" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-droplet w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 3. Meconium & Other Signs</button></li>
+                <li><button onclick="showSection('interventions')" id="btn-interventions" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-hand-holding-medical w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 4. Intrauterine Resuscitation</button></li>
+                <li><button onclick="showSection('nursing')" id="btn-nursing" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-user-nurse w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 5. Nursing Role & Documentation</button></li>
+                <li><button onclick="showSection('mnemonics')" id="btn-mnemonics" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors locked-section"><i class="fa-solid fa-brain w-6 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> 6. Mnemonic Appendix</button></li>
+                <li><button onclick="showSection('final_quiz_sec')" id="btn-final_quiz_sec" class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-50 transition-colors border-t border-slate-200 mt-2 locked-section"><i class="fa-solid fa-graduation-cap w-6 text-amber-500 nav-icon hidden"></i><i class="fa-solid fa-lock w-6 text-slate-400"></i> Final 50‑Item Exam</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 h-full overflow-y-auto bg-slate-100 relative w-full">
+        <div class="fixed top-16 md:top-4 right-4 md:right-8 z-40 flex items-center bg-white/90 backdrop-blur px-4 py-3 rounded-full shadow-lg border border-slate-200 cursor-pointer hover:bg-slate-50" onclick="toggleRecallMode()">
+            <span class="mr-3 text-sm font-bold text-slate-700 hidden md:inline"><i class="fa-solid fa-brain text-fd mr-1"></i> Active Recall</span>
+            <span class="mr-3 text-sm font-bold text-slate-700 md:hidden"><i class="fa-solid fa-brain text-fd"></i></span>
+            <button id="recall-toggle" class="w-12 h-6 bg-slate-300 rounded-full relative transition-colors duration-300 focus:outline-none shadow-inner pointer-events-none">
+                <div id="recall-knob" class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform duration-300 shadow"></div>
+            </button>
+        </div>
+
+        <div class="p-4 md:p-8 max-w-6xl mx-auto pb-32">
+            <!-- HOME -->
+            <section id="home" class="content-section flex flex-col items-center justify-center min-h-[80vh] text-center block">
+                <div class="bg-gradient-to-br from-slate-800 to-fd-dark text-white rounded-3xl shadow-2xl p-10 md:p-16 w-full relative overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 text-white opacity-5"><i class="fa-solid fa-waveform text-[20rem]"></i></div>
+                    <div class="relative z-10">
+                        <div class="bg-white/10 backdrop-blur-sm inline-block p-4 rounded-full text-fd-light mb-6"><i class="fa-solid fa-heart-crack text-5xl"></i></div>
+                        <h3 class="text-xl font-bold text-slate-300 mb-2 uppercase">Maternal‑Child Nursing · Adele Pillitteri</h3>
+                        <h1 class="text-4xl md:text-6xl font-black leading-tight drop-shadow-md">Fetal Distress</h1>
+                        <p class="text-lg max-w-2xl mx-auto mt-6 text-slate-200">Signs of fetal hypoxia/acidosis requiring urgent intervention. Master FHR patterns (late/variable decelerations, tachycardia, bradycardia), meconium, intrauterine resuscitation, and nursing management.</p>
+                        <button onclick="unlockFirstSection()" class="mt-10 bg-slate-600 hover:bg-slate-500 text-white font-black py-4 px-12 rounded-full shadow-xl transition-transform hover:scale-105 text-lg flex items-center mx-auto">Begin Module <i class="fa-solid fa-arrow-right ml-3"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 1: Definition & Causes -->
+            <section id="overview" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-fd pb-3"><i class="fa-solid fa-book-open text-fd mr-4"></i> Definition & Causes of Fetal Distress</h2>
+                    <div class="bg-fd-light/20 border-l-4 border-fd p-4 rounded-r mb-6">Fetal distress (now often termed non‑reassuring fetal status) is a condition in which the fetus shows evidence of <span class="reveal-text">hypoxia, acidosis, or compromise</span> that may lead to permanent injury or death if not promptly addressed.</div>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Maternal causes:</strong> Hypertension, hypotension, diabetes, anemia, hypoxemia, seizures, trauma, fever, tachyarrhythmias.</li>
+                        <li><strong>Placental causes:</strong> Abruption, previa, insufficiency, infarction, post‑term pregnancy.</li>
+                        <li><strong>Umbilical cord causes:</strong> Prolapse, true knot, nuchal cord, compression, short cord.</li>
+                        <li><strong>Fetal causes:</strong> Anemia, infection (chorioamnionitis), arrhythmia, congenital anomalies.</li>
+                        <li><strong>Labor‑related causes:</strong> Uterine hyperstimulation (tachysystole), prolonged labor, rapid descent, medications (epidural hypotension).</li>
+                    </ul>
+                    <button onclick="openQuiz('overview')" class="mt-8 w-full bg-fd text-white font-black py-4 rounded-xl shadow-md hover:bg-fd-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 2: FHR Patterns & Decelerations -->
+            <section id="fhr" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-fd pb-3"><i class="fa-solid fa-waveform text-fd mr-4"></i> FHR Patterns & Decelerations</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Baseline FHR:</strong> 110–160 bpm. <span class="reveal-text">Tachycardia (>160 bpm)</span> – early sign of hypoxia, infection, drugs. <span class="reveal-text">Bradycardia (<110 bpm)</span> – severe hypoxia, cord compression, maternal hypotension.</li>
+                        <li><strong>Variability:</strong> Moderate (6–25 bpm) is reassuring. <span class="reveal-text">Minimal or absent variability</span> suggests acidemia or CNS depression.</li>
+                        <li><strong>Early decelerations:</strong> Mirror contraction, due to head compression – <span class="reveal-text">benign</span>.</li>
+                        <li><strong>Late decelerations:</strong> Begin after contraction peak, return after contraction ends – <span class="reveal-text">uteroplacental insufficiency</span> – ominous.</li>
+                        <li><strong>Variable decelerations:</strong> Abrupt, variable shape – <span class="reveal-text">cord compression</span>.</li>
+                        <li><strong>Prolonged deceleration:</strong> Lasts 2–10 minutes – urgent evaluation.</li>
+                        <li><strong>Significance:</strong> Late decelerations + absent variability = severe fetal distress, impending acidosis.</li>
+                    </ul>
+                    <div class="bg-amber-50 p-2 rounded-lg mt-2 text-sm">⚠️ <strong>Interventions for late/variable decelerations:</strong> Lateral position, oxygen, IV fluids, stop oxytocin, consider amnioinfusion.</div>
+                    <button onclick="openQuiz('fhr')" class="mt-8 w-full bg-fd text-white font-black py-4 rounded-xl shadow-md hover:bg-fd-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 3: Meconium & Other Signs -->
+            <section id="meconium" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-fd pb-3"><i class="fa-solid fa-droplet text-fd mr-4"></i> Meconium & Other Signs of Fetal Compromise</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Meconium‑stained amniotic fluid:</strong> Passage of meconium before delivery suggests fetal distress, especially if thick (pea soup). Associated with post‑term pregnancy, IUGR, cord compression, placental insufficiency.</li>
+                        <li><strong>Fetal acidosis:</strong> Scalp pH <7.20 confirms hypoxia. Fetal scalp blood sampling (rarely done now).</li>
+                        <li><strong>Decreased fetal movement:</strong> Reduced activity can indicate chronic fetal compromise.</li>
+                        <li><strong>Abnormal biophysical profile (BPP):</strong> Score ≤4 indicates acidosis.</li>
+                        <li><strong>Elevated fetal lactate or base deficit.</strong></li>
+                    </ul>
+                    <div class="bg-blue-50 p-2 rounded-lg mt-2 text-sm">📌 <strong>Meconium aspiration syndrome (MAS):</strong> Thick meconium can cause airway obstruction, pneumonitis. Bulb suction, deep tracheal suction if thick meconium and non‑vigorous newborn.</div>
+                    <button onclick="openQuiz('meconium')" class="mt-8 w-full bg-fd text-white font-black py-4 rounded-xl shadow-md hover:bg-fd-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 4: Intrauterine Resuscitation -->
+            <section id="interventions" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-fd pb-3"><i class="fa-solid fa-hand-holding-medical text-fd mr-4"></i> Intrauterine Resuscitation</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Maternal repositioning:</strong> <span class="reveal-text">Left lateral</span> – relieves vena cava compression, improves placental blood flow.</li>
+                        <li><strong>Oxygen administration:</strong> 8–10 L/min via non‑rebreather mask – increases fetal oxygen delivery.</li>
+                        <li><strong>IV fluid bolus:</strong> Treats maternal hypotension (especially after epidural).</li>
+                        <li><strong>Reduce uterine activity:</strong> Stop or decrease oxytocin, administer tocolytic (terbutaline 0.25 mg subQ) for tachysystole.</li>
+                        <li><strong>Amnioinfusion:</strong> For recurrent variable decelerations (cord compression) – infuse warm saline into uterus via intrauterine catheter.</li>
+                        <li><strong>Fetal scalp stimulation:</strong> FHR acceleration after scalp stimulation indicates well‑being.</li>
+                        <li><strong>Delivery:</strong> If persistent non‑reassuring pattern despite resuscitation, expedite delivery via operative vaginal or cesarean section.</li>
+                    </ul>
+                    <button onclick="openQuiz('interventions')" class="mt-8 w-full bg-fd text-white font-black py-4 rounded-xl shadow-md hover:bg-fd-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 5: Nursing Role & Documentation -->
+            <section id="nursing" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-fd pb-3"><i class="fa-solid fa-user-nurse text-fd mr-4"></i> Nursing Role & Documentation</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Recognition:</strong> Interpret FHR tracing (baseline, variability, decelerations).</li>
+                        <li><strong>Immediate actions:</strong> Change maternal position (left lateral), increase IV fluids, apply oxygen, discontinue oxytocin, notify provider.</li>
+                        <li><strong>Monitor maternal vital signs, contraction frequency, and fetal response.</strong></li>
+                        <li><strong>Document:</strong> Time of onset, interventions, FHR pattern, fetal blood sampling results (if done), communication with provider, and delivery decisions.</li>
+                        <li><strong>Prepare for expedited delivery:</strong> Assist with vacuum/forceps or cesarean, have NICU team ready for neonatal resuscitation.</li>
+                        <li><strong>Emotional support:</strong> Explain interventions, reduce maternal anxiety, involve partner.</li>
+                    </ul>
+                    <button onclick="openQuiz('nursing')" class="mt-8 w-full bg-fd text-white font-black py-4 rounded-xl shadow-md hover:bg-fd-dark transition-colors text-lg"><i class="fa-solid fa-list-check mr-3"></i> Take 10-Item Quiz (Unlocks next section)</button>
+                </div>
+            </section>
+
+            <!-- Section 6: Mnemonics -->
+            <section id="mnemonics" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-black text-slate-800 mb-6 border-b-2 border-fd pb-3"><i class="fa-solid fa-brain text-fd mr-4"></i> Mnemonic Appendix</h2>
+                    <div class="overflow-x-auto rounded-xl border">
+                        <table class="w-full text-left text-sm md:text-base"><thead class="bg-fd-dark text-white"><tr><th class="p-3">Topic</th><th class="p-3">Mnemonic</th><th class="p-3">Meaning</th></tr></thead>
+                        <tbody><tr><td class="p-3 font-semibold">Causes of fetal distress</span><table><td class="font-black">M P U F</span></td><td class="reveal-text">Maternal, Placental, Umbilical cord, Fetal, Labor</span></td>
+                        <tr class="bg-slate-50"><td class="p-3 font-semibold">Non‑reassuring FHR patterns</span></td><td class="font-black">L T M V</span></td><td class="reveal-text">Late decelerations, Tachycardia, Minimal/absent variability, Variable severe</span></td>
+                        <tr><td class="p-3 font-semibold">Intrauterine resuscitation steps</span></td><td class="font-black">O L I S A</span></td><td class="reveal-text">Oxygen, Left lateral, IV fluids, Stop oxytocin, Amnioinfusion</span></td>
+                        <tr class="bg-slate-50"><td class="p-3 font-semibold">Significance of decelerations</span></td><td class="font-black">E L V</span></td><td class="reveal-text">Early (head compression, benign), Late (uteroplacental insufficiency), Variable (cord compression)</span></td>
+                        <tr><td class="p-3 font-semibold">Meconium grading</span></td><td class="font-black">L M T</span><td><td class="reveal-text">Light, Moderate, Thick (pea soup)</span></td>
+                        </tbody>
+                    </table>
+                    <button onclick="openQuiz('final_quiz')" class="mt-8 w-full bg-amber-500 text-slate-900 font-black py-4 rounded-xl shadow-md hover:bg-amber-400 text-lg"><i class="fa-solid fa-graduation-cap mr-3"></i> Take Final 50‑Item Exam</button>
+                </div>
+            </section>
+
+            <!-- Final Quiz Section -->
+            <section id="final_quiz_sec" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-lg p-8 text-center min-h-[60vh] flex flex-col justify-center items-center">
+                    <i class="fa-solid fa-graduation-cap text-8xl text-amber-400 mb-6"></i>
+                    <h2 class="text-4xl font-black text-slate-800 mb-4">Final 50‑Item Exam</h2>
+                    <p class="text-lg text-slate-600 mb-8">Covers all 5 sections. 75% required to pass.</p>
+                    <button onclick="openQuiz('final_quiz')" class="w-full max-w-md bg-fd-dark text-white font-black py-4 rounded-xl shadow-md hover:bg-fd text-xl">Start Final Exam</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl p-6 md:p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeQuiz()" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 id="quiz-title" class="text-3xl font-black text-slate-800 mb-2"></h2>
+            <p class="text-slate-600 mb-6 font-medium border-b pb-4">Score ≥75% to unlock next section.</p>
+            <div id="quiz-questions-container" class="space-y-4"></div>
+            <button id="quiz-submit-btn" onclick="submitQuiz()" class="mt-8 w-full bg-fd text-white font-bold py-4 rounded-xl shadow-lg text-lg">Submit Answers</button>
+            <div id="quiz-result-container" class="hidden mt-6 p-4 rounded-xl bg-slate-100 border"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let unlockedSections = ['home'];
+            // Quiz data – 10 questions each for 5 sections (overview, fhr, meconium, interventions, nursing)
+            const quizzes = {
+                overview: {
+                    title: "Quiz 1: Definition & Causes (10 items)",
+                    next: "fhr",
+                    questions: [
+                        { q: "Fetal distress (non‑reassuring fetal status) indicates:", options: ["Normal fetal oxygenation", "Fetal hypoxia, acidosis, or compromise", "Maternal discomfort", "Early labor"], ans: 1 },
+                        { q: "Which of the following is a maternal cause of fetal distress?", options: ["Post‑term pregnancy", "Maternal hypotension or hypertension", "Nuchal cord", "Chorioamnionitis"], ans: 1 },
+                        { q: "Uterine hyperstimulation (tachysystole) can cause fetal distress by:", options: ["Increasing fetal movement", "Reducing placental perfusion and oxygen delivery", "Lengthening gestation", "Causing fetal tachycardia only"], ans: 1 },
+                        { q: "Placental abruption leads to fetal distress through:", options: ["Increased amniotic fluid", "Reduced placental surface and oxygenation", "Polyhydramnios", "Fetal macrosomia"], ans: 1 },
+                        { q: "Cord prolapse is an emergency because it causes:", options: ["Fetal movement", "Cord compression and acute fetal hypoxia", "Maternal hypertension", "Polyhydramnios"], ans: 1 },
+                        { q: "Which of the following is NOT a cause of fetal distress?", options: ["Maternal fever", "Umbilical cord knot", "Normal variability", "Placental insufficiency"], ans: 2 },
+                        { q: "Maternal hypotension after epidural can cause fetal distress by:", options: ["Increasing uterine blood flow", "Decreasing uterine perfusion", "Causing fetal bradycardia", "Both B and C"], ans: 3 },
+                        { q: "Fetal anemia can cause distress due to:", options: ["Increased oxygen carrying capacity", "Decreased oxygen delivery", "Polycythemia", "Hypovolemia"], ans: 1 },
+                        { q: "Which intrapartum event most commonly causes acute fetal distress?", options: ["Prolonged latent phase", "Umbilical cord compression or abruption", "Lightening", "Braxton Hicks"], ans: 1 },
+                        { q: "Chronic fetal distress may be indicated by:", options: ["Decreased fetal movement and IUGR", "Polyhydramnios", "Macrosomia", "Post‑term pregnancy"], ans: 0 }
+                    ]
+                },
+                fhr: {
+                    title: "Quiz 2: FHR Patterns & Decelerations (10 items)",
+                    next: "meconium",
+                    questions: [
+                        { q: "Late decelerations are caused by:", options: ["Head compression", "Cord compression", "Uteroplacental insufficiency", "Maternal fever"], ans: 2 },
+                        { q: "Variable decelerations are associated with:", options: ["Head compression", "Cord compression", "Uteroplacental insufficiency", "Fetal sleep"], ans: 1 },
+                        { q: "Early decelerations are considered:", options: ["Ominous", "Benign, due to head compression", "Sign of fetal hypoxia", "Require immediate delivery"], ans: 1 },
+                        { q: "A fetal heart rate of 170 bpm with minimal variability and recurrent late decelerations indicates:", options: ["Normal tracing", "Severe fetal distress", "Maternal fever only", "Benign pattern"], ans: 1 },
+                        { q: "The normal baseline fetal heart rate is:", options: ["90–110 bpm", "110–160 bpm", "160–180 bpm", "180–200 bpm"], ans: 1 },
+                        { q: "Absent variability with recurrent late decelerations suggests:", options: ["Fetal well‑being", "Fetal acidemia and impending compromise", "Maternal position change", "Uterine hypertonus"], ans: 1 },
+                        { q: "Prolonged deceleration lasts:", options: ["15–30 seconds", "30–60 seconds", "2–10 minutes", ">10 minutes"], ans: 2 },
+                        { q: "The most ominous FHR pattern is:", options: ["Early decelerations", "Variable decelerations with moderate variability", "Late decelerations with absent variability", "Accelerations"], ans: 2 },
+                        { q: "Maternal fever can cause fetal:", options: ["Bradycardia", "Tachycardia and loss of variability", "Early decelerations", "Normal tracing"], ans: 1 },
+                        { q: "The first intervention for late decelerations is:", options: ["Discontinue oxytocin", "Administer terbutaline", "Prepare for cesarean", "Change maternal position to left lateral"], ans: 3 }
+                    ]
+                },
+                meconium: {
+                    title: "Quiz 3: Meconium & Other Signs (10 items)",
+                    next: "interventions",
+                    questions: [
+                        { q: "Meconium‑stained amniotic fluid is most concerning when:", options: ["Light, thin meconium", "Thick, pea soup meconium", "Absent meconium", "Green fluid with normal FHR"], ans: 1 },
+                        { q: "Meconium passage in utero can indicate:", options: ["Normal fetal maturity", "Fetal hypoxia or distress", "Post‑term pregnancy only", "Polyhydramnios"], ans: 1 },
+                        { q: "A biophysical profile (BPP) score of 4/10 suggests:", options: ["Normal fetus", "Fetal acidosis, needs delivery", "Mild distress, repeat later", "Artifact"], ans: 1 },
+                        { q: "Fetal scalp pH <7.20 indicates:", options: ["Normal acid‑base balance", "Fetal acidosis and hypoxia", "Maternal alkalosis", "Benign finding"], ans: 1 },
+                        { q: "Decreased fetal movement is a sign of:", options: ["Chronic fetal compromise", "Normal sleep cycle (must differentiate)", "Both A and B", "Polyhydramnios"], ans: 2 },
+                        { q: "Thick meconium at delivery increases risk of:", options: ["Neonatal sepsis", "Meconium aspiration syndrome and respiratory distress", "Hypoglycemia", "Hyperbilirubinemia"], ans: 1 },
+                        { q: "Which of the following is NOT a sign of fetal distress?", options: ["Meconium‑stained fluid", "Late decelerations", "Accelerations with fetal movement", "Absent variability"], ans: 2 },
+                        { q: "The presence of thick meconium with non‑reassuring FHR should prompt:", options: ["Expectant management", "Immediate delivery (operative vaginal or cesarean)", "Discharge home", "Antibiotics only"], ans: 1 },
+                        { q: "Fetal scalp stimulation test: a reactive FHR acceleration after scalp stimulation indicates:", options: ["Fetal acidosis", "Fetal well‑being (pH >7.20)", "Cord compression", "Need for cesarean"], ans: 1 },
+                        { q: "Elevated fetal lactate is associated with:", options: ["Normal oxygenation", "Fetal hypoxia and acidosis", "Maternal fever", "Polyhydramnios"], ans: 1 }
+                    ]
+                },
+                interventions: {
+                    title: "Quiz 4: Intrauterine Resuscitation (10 items)",
+                    next: "nursing",
+                    questions: [
+                        { q: "The first intervention for recurrent variable decelerations is:", options: ["Administer oxygen", "Change maternal position (lateral)", "Increase oxytocin", "Prepare for cesarean"], ans: 1 },
+                        { q: "Oxygen is administered to a patient with fetal distress at:", options: ["2 L/min via nasal cannula", "8–10 L/min via non‑rebreather mask", "15 L/min via bag‑valve‑mask", "Only during contractions"], ans: 1 },
+                        { q: "If late decelerations persist despite repositioning and oxygen, the next action is:", options: ["Administer terbutaline", "Discontinue oxytocin, increase IV fluids, notify provider", "Perform amnioinfusion", "Start magnesium"], ans: 1 },
+                        { q: "Amnioinfusion is indicated for:", options: ["Late decelerations", "Recurrent variable decelerations (cord compression)", "Maternal hypertension", "Post‑term pregnancy"], ans: 1 },
+                        { q: "Tocolytic (terbutaline) is used in fetal distress to:", options: ["Increase contractions", "Reduce uterine tachysystole and improve perfusion", "Induce labor", "Treat maternal fever"], ans: 1 },
+                        { q: "Which maternal position best improves uteroplacental blood flow?", options: ["Supine flat", "Left lateral recumbent", "Lithotomy", "Trendelenburg"], ans: 1 },
+                        { q: "If fetal distress is unresponsive to intrauterine resuscitation, the nurse should anticipate:", options: ["Continued observation", "Expedited delivery (vacuum, forceps, or cesarean)", "Discharge home", "Increase oxytocin"], ans: 1 },
+                        { q: "IV fluid bolus is given during fetal distress to:", options: ["Treat maternal hypotension and improve uterine blood flow", "Induce diuresis", "Increase fetal heart rate", "Stop contractions"], ans: 0 },
+                        { q: "The priority when variable decelerations are noted is to:", options: ["Prepare for immediate cesarean", "Reposition patient (relieve cord compression)", "Administer betamethasone", "Start amnioinfusion immediately"], ans: 1 },
+                        { q: "Which intervention should be avoided if uterine tachysystole is causing fetal distress?", options: ["Discontinuing oxytocin", "Administering terbutaline", "Increasing oxytocin", "Changing maternal position"], ans: 2 }
+                    ]
+                },
+                nursing: {
+                    title: "Quiz 5: Nursing Role & Documentation (10 items)",
+                    next: "mnemonics",
+                    questions: [
+                        { q: "The nurse's first action upon seeing late decelerations is:", options: ["Notify provider", "Change maternal position to left lateral", "Increase oxytocin", "Prepare for cesarean"], ans: 1 },
+                        { q: "Which of the following must be documented in a case of fetal distress?", options: ["Time of onset, interventions, FHR pattern, provider notification", "Only patient's temperature", "Only labor duration", "Only infant weight"], ans: 0 },
+                        { q: "When preparing for possible emergent cesarean for fetal distress, the nurse should:", options: ["Inform the patient and family, prepare surgical consent, ensure NICU attendance", "Send patient alone to OR", "Delay informing patient", "Only call anesthesia"], ans: 0 },
+                        { q: "The nurse should educate the patient that fetal distress interventions (oxygen, position change) are intended to:", options: ["Immediately deliver the baby", "Increase oxygen to the baby and improve placental blood flow", "Stop labor", "Induce analgesia"], ans: 1 },
+                        { q: "If a patient has thick meconium and non‑reassuring FHR, the nurse should:", options: ["Auscultate FHR intermittently", "Prepare for possible operative delivery and have neonatal resuscitation team ready", "Wait for spontaneous labor", "Apply ice packs"], ans: 1 },
+                        { q: "Continuous monitoring of FHR during intrauterine resuscitation is essential to:", options: ["Evaluate fetal response and guide further interventions", "Speed up labor", "Reduce maternal pain", "Prevent infection"], ans: 0 },
+                        { q: "The nurse should notify the provider immediately if:", options: ["Late decelerations do not resolve with initial measures", "FHR is 130 bpm with moderate variability", "Patient requests pain medication", "Contractions are every 5 minutes"], ans: 0 },
+                        { q: "Emotional support for a patient experiencing fetal distress includes:", options: ["Explain what is happening, reassure, involve support person", "Withhold information to reduce anxiety", "Leave patient alone", "Sedate patient"], ans: 0 },
+                        { q: "After delivery for fetal distress, the nurse should:", options: ["Document Apgar scores, cord gases, and neonatal resuscitation", "Discharge patient immediately", "Only document maternal vitals", "Avoid noting neonatal status"], ans: 0 },
+                        { q: "A nurse suspects fetal distress based on FHR pattern. The correct chain of action is:", options: ["Notify provider first", "Perform intrauterine resuscitation (position, oxygen) while notifying provider", "Prepare for cesarean without other actions", "Wait 30 minutes"], ans: 1 }
+                    ]
+                }
+            };
+            
+            // Build final 50‑item exam (10 from each of 5 sections)
+            let finalQuestions = [];
+            for(let sec of ['overview','fhr','meconium','interventions','nursing']) {
+                finalQuestions = finalQuestions.concat(quizzes[sec].questions.slice(0,10));
+            }
+            while(finalQuestions.length < 50) finalQuestions.push({ q: "Late decelerations are caused by:", options: ["Head compression", "Cord compression", "Uteroplacental insufficiency", "Maternal fever"], ans: 2 });
+            quizzes['final_quiz'] = { title: "Final 50‑Item Exam: Fetal Distress", next: null, questions: finalQuestions.slice(0,50) };
+            
+            // Global functions
+            window.unlockedSections = unlockedSections;
+            window.quizzes = quizzes;
+            
+            window.unlockFirstSection = function() {
+                if(!unlockedSections.includes('overview')) {
+                    unlockedSections.push('overview');
+                    updateSidebarUI();
+                }
+                showSection('overview');
+            };
+            
+            window.showSection = function(id) {
+                if(!unlockedSections.includes(id) && id !== 'home') {
+                    alert("Complete the previous section quiz (≥75%) to unlock this content.");
+                    return;
+                }
+                document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
+                const target = document.getElementById(id);
+                if(target) target.classList.remove('hidden');
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.getElementById('btn-'+id);
+                if(activeBtn) activeBtn.classList.add('active');
+                if(window.innerWidth < 768) document.getElementById('sidebar')?.classList.add('hidden');
+                document.querySelector('main').scrollTop = 0;
+            };
+            
+            function updateSidebarUI() {
+                const all = ['home','overview','fhr','meconium','interventions','nursing','mnemonics','final_quiz_sec'];
+                all.forEach(sec => {
+                    const btn = document.getElementById('btn-'+sec);
+                    if(!btn) return;
+                    const lockIcon = btn.querySelector('.fa-lock'), mainIcon = btn.querySelector('.nav-icon');
+                    if(unlockedSections.includes(sec) || sec === 'home') {
+                        btn.classList.remove('locked-section');
+                        if(lockIcon) lockIcon.classList.add('hidden');
+                        if(mainIcon) mainIcon.classList.remove('hidden');
+                    } else {
+                        btn.classList.add('locked-section');
+                        if(lockIcon) lockIcon.classList.remove('hidden');
+                        if(mainIcon) mainIcon.classList.add('hidden');
+                    }
+                });
+            }
+            
+            let currentQuiz = null;
+            window.openQuiz = function(sectionId) {
+                currentQuiz = sectionId;
+                const qd = quizzes[sectionId];
+                if(!qd) return;
+                document.getElementById('quiz-title').innerText = qd.title;
+                const container = document.getElementById('quiz-questions-container');
+                container.innerHTML = '';
+                qd.questions.forEach((q, idx) => {
+                    let html = `<div class="bg-slate-50 p-4 rounded-xl border mb-4"><p class="font-bold mb-3">${idx+1}. ${q.q}</p><div class="space-y-2">`;
+                    q.options.forEach((opt, oi) => {
+                        html += `<label class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white cursor-pointer"><input type="radio" name="q${idx}" value="${oi}" class="form-radio text-fd"><span>${opt}</span></label>`;
+                    });
+                    html += `</div><div class="feedback-${idx} text-sm mt-2 hidden"></div></div>`;
+                    container.innerHTML += html;
+                });
+                document.getElementById('quiz-submit-btn').classList.remove('hidden');
+                document.getElementById('quiz-result-container').classList.add('hidden');
+                document.getElementById('quiz-modal').classList.remove('hidden');
+            };
+            
+            window.closeQuiz = function() { document.getElementById('quiz-modal').classList.add('hidden'); };
+            
+            window.submitQuiz = function() {
+                const qd = quizzes[currentQuiz];
+                if(!qd) return;
+                let score = 0;
+                for(let i = 0; i < qd.questions.length; i++) {
+                    const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                    const isCorrect = selected && parseInt(selected.value) === qd.questions[i].ans;
+                    if(isCorrect) score++;
+                    const fbDiv = document.querySelector(`.feedback-${i}`);
+                    if(fbDiv) {
+                        fbDiv.classList.remove('hidden');
+                        const correctAns = qd.questions[i].options[qd.questions[i].ans];
+                        if(isCorrect) {
+                            fbDiv.innerHTML = `<span class="text-green-700"><i class="fa-regular fa-circle-check"></i> Correct!</span>`;
+                            fbDiv.parentElement?.classList.add('quiz-feedback-correct');
+                            fbDiv.parentElement?.classList.remove('quiz-feedback-wrong');
+                        } else {
+                            const selectedText = selected ? qd.questions[i].options[parseInt(selected.value)] : "No answer";
+                            fbDiv.innerHTML = `<span class="text-red-700"><i class="fa-regular fa-circle-xmark"></i> Incorrect. Correct: ${correctAns}. Your answer: ${selectedText}</span>`;
+                            fbDiv.parentElement?.classList.add('quiz-feedback-wrong');
+                            fbDiv.parentElement?.classList.remove('quiz-feedback-correct');
+                        }
+                    }
+                }
+                const percent = (score / qd.questions.length) * 100;
+                const resultDiv = document.getElementById('quiz-result-container');
+                const btn = document.getElementById('quiz-submit-btn');
+                btn.classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+                if(percent >= 75) {
+                    if(currentQuiz === 'final_quiz') {
+                        resultDiv.innerHTML = `<div class="text-amber-500 text-6xl text-center">🏆</div><h3 class="text-2xl font-black text-center">Mastery Achieved!</h3><p class="text-center">Score ${score}/${qd.questions.length} (${percent}%)</p><p class="text-center text-green-700">You have mastered Fetal Distress based on Adele Pillitteri.</p><button onclick="closeQuiz()" class="mt-4 w-full bg-fd text-white py-2 rounded-lg">Close</button>`;
+                        return;
+                    }
+                    if(qd.next && !unlockedSections.includes(qd.next)) {
+                        unlockedSections.push(qd.next);
+                        if(qd.next === 'mnemonics') unlockedSections.push('final_quiz_sec');
+                        updateSidebarUI();
+                    }
+                    resultDiv.innerHTML = `<div class="text-green-600 text-5xl text-center">✓</div><h3 class="text-2xl font-black text-center">Passed!</h3><p class="text-center">Score ${score}/${qd.questions.length} (${percent}%)</p><button onclick="closeQuiz(); showSection('${qd.next}')" class="mt-4 w-full bg-green-600 text-white py-2 rounded-lg">Unlock Next Section</button>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="text-red-500 text-5xl text-center">✗</div><h3 class="text-2xl font-black text-center">Failed</h3><p class="text-center">Score ${score}/${qd.questions.length} (${percent}%). Need 75%.</p><button onclick="openQuiz('${currentQuiz}')" class="mt-4 w-full bg-slate-600 text-white py-2 rounded-lg">Try Again</button>`;
+                }
+            };
+            
+            window.toggleRecallMode = function() {
+                const active = !document.body.classList.contains('recall-mode');
+                const toggle = document.getElementById('recall-toggle'), knob = document.getElementById('recall-knob');
+                if(active) {
+                    document.body.classList.add('recall-mode');
+                    toggle.classList.add('bg-fd');
+                    knob.classList.add('translate-x-6');
+                } else {
+                    document.body.classList.remove('recall-mode');
+                    toggle.classList.remove('bg-fd');
+                    knob.classList.remove('translate-x-6');
+                }
+            };
+            
+            window.toggleMobileMenu = function() {
+                const s = document.getElementById('sidebar');
+                if(s.classList.contains('hidden')) s.classList.remove('hidden');
+                else s.classList.add('hidden');
+            };
+            
+            document.addEventListener('DOMContentLoaded', () => {
+                updateSidebarUI();
+                document.querySelectorAll('.reveal-text').forEach(el => {
+                    el.addEventListener('click', function() {
+                        if(document.body.classList.contains('recall-mode')) this.classList.toggle('revealed');
+                    });
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
